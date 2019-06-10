@@ -1,0 +1,12 @@
+Package: niftiR6
+Type: Package
+Title: Read and write NIfTI-1/NIfTI-2 files
+Version: 0.1.9
+Authors@R: person("Wouter", "Weeda", email = "w.d.weeda@fsw.leidenuniv.nl",
+  role = c("aut", "cre"))
+Description: Reads and writes NIfTI-1/NIfTI-2 files. Uses R6 classes for NIfTI files for easy access to header info and easy data manipulation (BETA VERSION). niftiR6 comes with ABSOLUTELY NO WARRANTY.
+License: GPL-3
+Imports: R6
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
