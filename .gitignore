@@ -5,6 +5,9 @@
 .Rhistory
 .Rapp.history
 
+#build ignore
+.Rbuildignore
+
 # Session Data files
 .RData
 

@@ -710,6 +710,7 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
       writeBin(as.integer(self$slice_end),private$connection,size=2,endian=private$endian)
       writeBin(as.integer(self$slice_code),private$connection,size=1,endian=private$endian)
       writeBin(charToRaw(self$xyzt_units),private$connection,endian=private$endian)
+      writeBin(raw(1-nchar(self$xyzt_units)),private$connection,endian=private$endian)
       writeBin(as.double(self$cal_max),private$connection,size=4,endian=private$endian)
       writeBin(as.double(self$cal_min),private$connection,size=4,endian=private$endian)
       writeBin(as.double(self$slice_duration),private$connection,size=4,endian=private$endian)
