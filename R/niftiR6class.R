@@ -1159,7 +1159,7 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
       tempdat <- as.vector(self$data)
 
       if(self$scl_slope!=0) {
-        tempdat <- tempdat/self$scl_slope - self$scl_inter
+        tempdat <- (tempdat-self$scl_inter)/self$scl_slope
       }
 
       mode(tempdat) <- private$data.type
