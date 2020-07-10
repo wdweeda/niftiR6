@@ -941,6 +941,11 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
         datavec <- readBin(private$connection, what=private$data.type, n=n, signed=private$data.signed, endian=private$endian)
       } else {
         datavec <- readBin(private$connection, what=private$data.type, n=n, size=(self$bitpix/8), signed=private$data.signed, endian=private$endian)
+
+        #check for scaling and scale values
+        if(self$scl_slope!=0) {
+          datavec <- (self$scl_slope*datavec) + self$scl_inter
+        }
       }
 
       #make daya into a vector
@@ -1147,8 +1152,20 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
     writeDataNifti = function() {
 
       #write the data
-      mode(self$data) <- private$data.type
-      writeBin(as.vector(self$data),private$connection,size=(self$bitpix/8),endian=private$endian)
+      #mode(self$data) <- private$data.type
+      #writeBin(as.vector(self$data),private$connection,size=(self$bitpix/8),endian=private$endian)
+
+      #check for slope and make data
+      tempdat <- as.vector(self$data)
+
+      if(self$scl_slope!=0) {
+        tempdat <- tempdat/self$scl_slope - self$scl_inter
+      }
+
+      mode(tempdat) <- private$data.type
+      writeBin(as.vector(tempdat),private$connection,size=(self$bitpix/8),endian=private$endian)
+
+      rm(tempdat)
 
       invisible(self)
 
