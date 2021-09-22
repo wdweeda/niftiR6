@@ -220,10 +220,10 @@ niftiInfoR6 <- R6::R6Class("niftiInfoR6",
 
       } else if(magic=='n+2\r\n\032\n') {
         private$filetype <- 'nifti+2'
-
+        
       } else if(magic=='ni2\r\n\032\n') {
         private$filetype <- 'nifti2'
-
+        
       } else {
         stop('Magicstring contains unknown characters (',magic,').File might not be the correct format.\n')
       }
@@ -824,17 +824,21 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
         esize <- readBin(private$connection,integer(),n=1,size=4,signed=T,endian=private$endian)
         ecode <- readBin(private$connection,integer(),n=1,size=4,signed=T,endian=private$endian)
 
-        if(esize != 0) {
-          #read in everything up until esize (raw at the moment, adapt based on ecode)
-          extensionList <- list(esize = esize, ecode = ecode, rawData = readBin(private$connection,raw(),n=(esize - 8),endian=private$endian))
-          extensionData[[extnum]] <- extensionList
+        if(length(esize)>0) {
+          if(esize != 0) {
+            #read in everything up until esize (raw at the moment, adapt based on ecode)
+            extensionList <- list(esize = esize, ecode = ecode, rawData = readBin(private$connection,raw(),n=(esize - 8),endian=private$endian))
+            extensionData[[extnum]] <- extensionList
+            } else {
+              reachedEnd <- TRUE
+            }
         } else {
           reachedEnd <- TRUE
         }
 
         extnum <- extnum + 1
       }
-
+      
       self$extension_data <- extensionData
 
       invisible(self)
@@ -857,7 +861,7 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
 
     xyztTounits = function() {
 
-      xyzt_bits <- rawToBits(charToRaw(self$xyzt_units))
+      xyzt_bits <- rawToBits(charToRaw(as.character(self$xyzt_units)))
       if(length(xyzt_bits)>=6) {
         if(private$endian == 'little') {
           space_int <- bin2dec(rev(xyzt_bits[1:3]))
@@ -1172,13 +1176,27 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
     },
 
     vec2array = function(vec) {
-
-      #check dimension with warning if mismatch
-      if(prod(self$dims[2:(self$dims[1]+1)])!=length(vec)) stop('Dimensions in header do not match length of data vector provided.')
-
-      #convert data to array
-      self$data <- array(vec,dim=self$dims[2:(self$dims[1]+1)])
-
+      #browser()
+       
+      convertData <- TRUE
+      if(!is.na(as.numeric(self$intent_code))) {
+        if(as.numeric(self$intent_code)>=3000 & as.numeric(self$intent_code)<=3999) {
+          cat(paste0('Detected CIFTI1/2 file-format: ',self$intent_code,' > ',self$intent_name,'\n'))
+          convertData <- FALSE
+        } 
+      }
+      
+      if(convertData) {
+        #check dimension with warning if mismatch
+        if(prod(self$dims[2:(self$dims[1]+1)])!=length(vec)) stop('Dimensions in header do not match length of data vector provided.')
+  
+        #convert data to array
+        self$data <- array(vec,dim=self$dims[2:(self$dims[1]+1)])
+      } else {
+        self$data <- vec
+        warning('Data was not converted\n')
+      }
+      
       invisible(self)
     },
 
