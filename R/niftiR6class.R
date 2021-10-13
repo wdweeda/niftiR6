@@ -935,8 +935,9 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
       private$openConnection()
 
       #calculate vector size
-      n <- (self$dims[2]*self$dims[3]*self$dims[4]*self$dims[5]*(self$bitpix/8))
-
+      #n <- (self$dims[2]*self$dims[3]*self$dims[4]*self$dims[5]*(self$bitpix/8))
+      n <- (prod(self$dims[2:(self$dims[1]+1)])*(self$bitpix/8))
+      
       #read (and discard) everthing before vox_offset (is already read in by readHeader)
       readBin(private$connection,raw(),self$vox_offset)
 
@@ -952,7 +953,7 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
         }
       }
 
-      #make daya into a vector
+      #make data into a vector
       private$vec2array(datavec)
 
       #close connection
@@ -1188,7 +1189,7 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
       
       if(convertData) {
         #check dimension with warning if mismatch
-        if(prod(self$dims[2:(self$dims[1]+1)])!=length(vec)) stop('Dimensions in header do not match length of data vector provided.')
+        if(prod(self$dims[2:(self$dims[1]+1)])!=length(vec)) stop(paste0('Dimensions in header do not match length of data vector provided.',prod(self$dims[2:(self$dims[1]+1)]),'!=',length(vec)))
   
         #convert data to array
         self$data <- array(vec,dim=self$dims[2:(self$dims[1]+1)])
