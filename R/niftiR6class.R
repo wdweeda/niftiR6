@@ -926,7 +926,7 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
     data = NULL,
 
     #functions
-    readData = function(filename) {
+    readData = function(filename,ignoreDims=F) {
 
       #read in Header
       self$readHeader(filename)
@@ -935,7 +935,6 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
       private$openConnection()
 
       #calculate vector size
-      #n <- (self$dims[2]*self$dims[3]*self$dims[4]*self$dims[5]*(self$bitpix/8))
       n <- (prod(self$dims[2:(self$dims[1]+1)])*(self$bitpix/8))
       
       #read (and discard) everthing before vox_offset (is already read in by readHeader)
@@ -953,9 +952,13 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
         }
       }
 
-      #make data into a vector
-      private$vec2array(datavec)
-
+      #make data into array
+      if(ignoreDims) {
+        self$data <- datavec   
+      } else {
+        private$vec2array(datavec) 
+      }  
+      
       #close connection
       close(private$connection)
 
@@ -1177,8 +1180,8 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
     },
 
     vec2array = function(vec) {
-      #browser()
-       
+     
+      #check for CIFTI1/2 format
       convertData <- TRUE
       if(!is.na(as.numeric(self$intent_code))) {
         if(as.numeric(self$intent_code)>=3000 & as.numeric(self$intent_code)<=3999) {
@@ -1194,6 +1197,8 @@ niftiDataR6 <- R6::R6Class("niftiDataR6",
         #convert data to array
         self$data <- array(vec,dim=self$dims[2:(self$dims[1]+1)])
       } else {
+        
+        #if CIFTI, don't make into array
         self$data <- vec
         warning('Data was not converted\n')
       }

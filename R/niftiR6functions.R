@@ -10,14 +10,14 @@
 #' @return object of class \code{\link{niftiDataR6}}
 #'
 #' @export
-readNifti <- function(filename = NULL) {
+readNifti <- function(filename = NULL, ignoreDims=F) {
 
   if(is.null(filename)) stop('Please give a proper filename.')
 
   if(!file.exists(filename)) stop(paste('File',filename,'does not seem to exist.\n'))
 
   niftiObject <- niftiDataR6$new()
-  niftiObject$readData(filename)
+  niftiObject$readData(filename,ignoreDims)
 
   return(niftiObject)
 }
