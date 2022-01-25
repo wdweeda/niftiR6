@@ -828,8 +828,14 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
           if(esize != 0) {
 
             #read in everything up until esize (raw at the moment, adapt based on ecode)
-            extensionList <- list(esize = esize, ecode = ecode, rawData = readBin(private$connection,raw(),n=(esize - ecode),endian=private$endian))
-            extensionData[[extnum]] <- extensionList
+            rawExtData <- try(readBin(private$connection,raw(),n=(esize - 8),endian=private$endian),silent = TRUE)
+            if(class(rawExtData)!='try-error') {
+              extensionList <- list(esize = esize, ecode = ecode, rawData = rawExtData)
+              extensionData[[extnum]] <- extensionList
+            } else {
+              reachedEnd <- TRUE
+            }
+
             } else {
               reachedEnd <- TRUE
             }
@@ -837,7 +843,8 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
           reachedEnd <- TRUE
         }
 
-        extnum <- extnum + 1
+      extnum <- extnum + 1
+        
       }
       
       self$extension_data <- extensionData
