@@ -826,8 +826,9 @@ niftiHeaderR6 <- R6::R6Class("niftiHeaderR6",
 
         if(length(esize)>0) {
           if(esize != 0) {
+            browser()
             #read in everything up until esize (raw at the moment, adapt based on ecode)
-            extensionList <- list(esize = esize, ecode = ecode, rawData = readBin(private$connection,raw(),n=(esize - 8),endian=private$endian))
+            extensionList <- list(esize = esize, ecode = ecode, rawData = readBin(private$connection,raw(),n=(esize - ecode),endian=private$endian))
             extensionData[[extnum]] <- extensionList
             } else {
               reachedEnd <- TRUE
